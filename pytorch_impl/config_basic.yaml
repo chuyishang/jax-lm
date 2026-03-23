@@ -1,0 +1,55 @@
+# Basic (non-distributed) training configuration for the Transformer Language Model
+
+# Model Architecture
+model:
+    d_model: 256 # Model embedding dimension
+    num_heads: 4 # Number of attention heads (d_model must be divisible by num_heads)
+    d_ff: 1024 # Feed-forward network hidden dimension
+    num_layers: 2 # Number of transformer blocks
+    vocab_size: 32000 # Vocabulary size (GPT-2 default)
+    context_length: 1024 # Maximum sequence length
+    theta: 10000.0 # RoPE theta parameter
+
+# Optimizer
+optimizer:
+    type: adamw # Optimizer type: 'adamw'
+    lr: 6e-4 # Learning rate
+    betas: [0.9, 0.95] # Adam beta parameters
+    weight_decay: 0.1 # Weight decay coefficient
+    eps: 1e-8 # Epsilon for numerical stability
+
+# Learning Rate Schedule
+lr_schedule:
+    warmup_iters: 2000 # Number of warmup iterations
+    max_learning_rate: 6e-4 # Maximum learning rate (after warmup)
+    min_learning_rate: 6e-5 # Minimum learning rate (final)
+    cosine_cycle_iters: 100000 # Total iterations for cosine annealing
+
+# Training
+training:
+    batch_size: 8 # Training batch size
+    max_iters: 100000 # Maximum number of training iterations
+    eval_interval: 500 # Evaluate every N iterations
+    log_interval: 100 # Log metrics every N iterations
+    perf_warmup_steps: 0 # Throughput/MFU measurement warmup (logging only)
+    gradient_clip: 1.0 # Maximum gradient L2 norm for clipping
+    device: cuda # Device: 'cuda' or 'cpu'
+    seed: 42 # Random seed for reproducibility
+
+# Data
+data:
+    dummy_data: false # If true, ignore train/val paths and use random synthetic token batches
+    dummy_num_tokens: 1000000 # Number of synthetic tokens when dummy_data=true
+    train_path: /scratch/current/shang/data/owt/train.bin # Path to training data
+    val_path: /scratch/current/shang/data/owt/val.bin # Path to validation data
+
+# Checkpointing
+checkpoint:
+    save_interval: 5000 # Save checkpoint every N iterations
+    checkpoint_dir: /scratch/current/shang/checkpoints # Directory to save checkpoints
+    resume_from: null # Path to checkpoint to resume from (null for fresh start)
+
+# Evaluation
+eval:
+    eval_iters: 100 # Number of iterations to evaluate
+    eval_batch_size: 32 # Batch size for evaluation
