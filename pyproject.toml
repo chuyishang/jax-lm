@@ -1,5 +1,5 @@
 [project]
-name = "pytorch_impl"
+name = "jax_impl"
 version = "1.0.5"
 description = "CS336 Assignment 1"
 readme = "README.md"
@@ -10,8 +10,6 @@ dependencies = [
     "flax>=0.10.0",
     "ipykernel>=6.29.0", # Jupyter kernel
     "rich>=13.0.0", # Beautiful TUI
-    # JAX (GPU): keep this pinned so uv/pip resolve a consistent jax+jaxlib combo
-    "jax[cuda13]==0.8.2",
     "jaxtyping>=0.3.0", # type hints for pytorch/jax/numpy
     "optax>=0.2.0",
     "jupyter>=1.0.0",
@@ -21,12 +19,15 @@ dependencies = [
     "regex>=2024.11.6",
     "submitit>=1.5.2",
     "tiktoken>=0.9.0",
-    # Torch - installed from PyTorch CUDA index to avoid cuDNN conflicts with JAX
     "torch>=2.6.0",
     "tqdm>=4.67.1",
     "wandb>=0.19.7",
     "ty>=0.0.1a16",
-    "jax>=0.8.1",
+]
+
+[dependency-groups]
+cuda = [
+    "jax[cuda13]==0.8.2; sys_platform == 'linux'",
 ]
 
 [build-system]
@@ -34,28 +35,17 @@ requires = ["uv_build>=0.8.3,<0.9.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = "pytorch_impl"
+module-name = "jax_impl"
 module-root = ""
 
 [tool.uv]
 package = true
+default-groups = ["cuda"]
 
 # Critical: when you're inside a conda env, force uv to use *that* python
 # (prevents "managed" python / CUDA stack mismatches)
 python-preference = "only-system"
 
-# Override nvidia-cudnn-cu12 to resolve JAX/PyTorch conflict
-# PyTorch bundles its own cuDNN so this is safe
-override-dependencies = ["nvidia-cudnn-cu12>=9.8"]
-
-# Use PyTorch's CUDA 12.4 wheel index to avoid cuDNN conflicts with JAX
-[[tool.uv.index]]
-name = "pytorch-cu124"
-url = "https://download.pytorch.org/whl/cu124"
-explicit = true
-
-[tool.uv.sources]
-torch = { index = "pytorch-cu124" }
 
 [tool.pytest.ini_options]
 log_cli = true
